@@ -23,9 +23,9 @@ import time
 import copy
 
 
-# ============================================================
+
 # PROPOSED OPTIMIZER: Adam-HN-AC
-# ============================================================
+
 
 class Adam_HN_AC(torch.optim.Optimizer):
     """
@@ -134,9 +134,9 @@ class Adam_HN_AC(torch.optim.Optimizer):
                 if group['weight_decay'] != 0:
                     grad = grad.add(p.data, alpha=group['weight_decay'])
                 
-                # ============================================================
+                
                 # ADAPTIVE CURVATURE ESTIMATION
-                # ============================================================
+                
                 if state['step'] > 1:
                     # Compute gradient difference for curvature estimation
                     grad_diff = grad - prev_grad
@@ -156,28 +156,28 @@ class Adam_HN_AC(torch.optim.Optimizer):
                     noise = torch.randn_like(grad) * noise_factor * grad.std()
                     grad = grad + noise
                 
-                # ============================================================
+                
                 # FIRST MOMENT UPDATE (with adaptive beta1)
-                # ============================================================
+                
                 exp_avg.mul_(adaptive_beta1).add_(grad, alpha=1 - adaptive_beta1)
                 
-                # ============================================================
+                
                 # SECOND MOMENT UPDATE (AMSGrad mechanism)
-                # ============================================================
+                
                 exp_avg_sq.mul_(beta2).addcmul_(grad, grad, value=1 - beta2)
                 
                 # AMSGrad: maintain maximum of second moment estimates
                 torch.max(max_exp_avg_sq, exp_avg_sq, out=max_exp_avg_sq)
                 
-                # ============================================================
+                
                 # BIAS CORRECTION
-                # ============================================================
+                
                 bias_correction1 = 1 - adaptive_beta1 ** state['step']
                 bias_correction2 = 1 - beta2 ** state['step']
                 
-                # ============================================================
+                
                 # ADAPTIVE LEARNING RATE (Hybrid Norm mechanism)
-                # ============================================================
+
                 if state['step'] > 1:
                     update_norm = prev_update.norm()
                     adaptive_lr = group['lr'] * (1 + alpha * torch.tanh(update_norm))
@@ -190,9 +190,9 @@ class Adam_HN_AC(torch.optim.Optimizer):
                 # Compute denominator with AMSGrad
                 denom = (max_exp_avg_sq.sqrt() / (bias_correction2 ** 0.5)).add_(group['eps'])
                 
-                # ============================================================
+                
                 # PARAMETER UPDATE
-                # ============================================================
+                
                 update = exp_avg / denom
                 
                 # Store update for next iteration's adaptive learning rate
@@ -204,9 +204,9 @@ class Adam_HN_AC(torch.optim.Optimizer):
         return loss
 
 
-# ============================================================
+
 # BASELINE OPTIMIZERS FOR COMPARISON
-# ============================================================
+
 
 class AdamOptimizer(torch.optim.Optimizer):
     """
@@ -357,9 +357,9 @@ class HN_Adam(torch.optim.Optimizer):
         return loss
 
 
-# ============================================================
+
 # CNN MODEL ARCHITECTURES
-# ============================================================
+
 
 class CNN_MNIST(nn.Module):
     """
@@ -520,9 +520,9 @@ class CNN_CIFAR10(nn.Module):
         return x
 
 
-# ============================================================
+
 # TRAINING AND EVALUATION FUNCTIONS
-# ============================================================
+
 
 def train_epoch(model, train_loader, optimizer, criterion, device):
     """
@@ -691,9 +691,9 @@ def train_model(model, train_loader, test_loader, optimizer, criterion,
     return history, best_acc
 
 
-# ============================================================
+
 # EXAMPLE USAGE
-# ============================================================
+
 
 if __name__ == "__main__":
     # Set device
